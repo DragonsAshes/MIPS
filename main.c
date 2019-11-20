@@ -31,11 +31,11 @@ int main(int argc, char** argv)
 		printf("%s\n", token);*/
 
 	readfile(input);
-	printf("passage à la fonction chartohex\n");
+	printf("\nEncodage...\n");
 
-	chartohex(input, output);
+	encode(input, output);
 
-	printf("Tout s'est bien passé\n");
+	printf("\nTout s'est bien passé\n");
 
 
 

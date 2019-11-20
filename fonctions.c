@@ -3,21 +3,21 @@
 
 void readfile(FILE* input)
 {
-	char line[128];
-	int i = 1;
+    char line[128];
+    int i = 1;
 
-	while( fgets ( line, sizeof line, input ) != NULL)
-	{
-		printf("Instruction %d : %s", i, line);
-		i++;
-	}
-	fseek(input, 0, SEEK_SET);
+    while( fgets ( line, sizeof line, input ) != NULL)
+    {
+        printf("Instruction %d : %s", i, line);
+        i++;
+    }
+    fseek(input, 0, SEEK_SET);
 }
 
 
 
 
-void chartohex(FILE* input, FILE* output)
+void encode(FILE* input, FILE* output)
 {
 	char line[128];
 	char* token = NULL;
@@ -30,34 +30,460 @@ void chartohex(FILE* input, FILE* output)
 		compteur = 0;
 		tmp = strdup(line);
 		token = strsep(&tmp, separators);
-		printf("%s ", token);
 		instruction = evaluate(token, line);
 		fprintf(output, "%08x\n", instruction);
 	}
 }
 
-int addi(char* line)
+int ADD(char* line)
+{
+	char* token = NULL;
+	char* tmp = NULL;
+	int i = 0;
+	char* data[3];
+	int res = 0;
+	tmp = strdup(line+4);
+	while( token = strsep(&tmp, ",") )
+		data[i++] = token;
+	res = 32;
+	res += 0 << 6;
+	res += atoi(data[0]+1)<<11;
+	res += atoi(data[2]+1)<<16;
+	res += atoi(data[1]+1)<<21;
+	printf("%08x\n", res);
+
+	return res;
+}
+
+
+int ADDI(char* line) //rajouter une sécurité (nb d'arguments)
 {
 	char* token = NULL; 
 	char* tmp = NULL;
-	char* separators = ",";
-	int compteur = 0;
 	int i=0;
 	char* data[3];
 	int res=0;
 	tmp = strdup(line+5);
-	printf("\n%s\n", tmp);
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
-
 	res = atoi(data[2]);
 	res += atoi(data[0]+1)<<16;
 	res += atoi(data[1]+1)<<21;
 	res += 8<<26;
-	printf("%08x\n", res);
 
 	return res;
 
+}
+
+int AND(char* line)
+{
+	char* token = NULL;
+	char* tmp = NULL;
+	int i=0;
+	char* data[3];
+	int res=0;
+	tmp = strdup(line+4);
+	while( token = strsep(&tmp, ",") )
+		data[i++] = token;
+	res = 36;
+	res += 0<<6;
+	res += atoi(data[0]+1)<<11;
+	res += atoi(data[2]+1)<<16;
+	res += atoi(data[1]+1)<<21;
+
+	return res;
+}
+
+int BEQ(char* line)
+{
+	char* token = NULL;
+	char* tmp = NULL;
+	int i=0;
+	char* data[3];
+	int res=0;
+	tmp = strdup(line+4);
+	while( token = strsep(&tmp, ",") )
+		data[i++] = token;
+	res = atoi(data[2]);
+	res += atoi(data[1]+1)<<16;
+	res += atoi(data[0]+1)<<21;
+	res += 4<<26;
+
+	return res;
+}
+
+int BGTZ(char* line)
+{
+	char* token = NULL;
+	char* tmp = NULL;
+	int i=0;
+	char* data[2];
+	int res=0;
+	tmp = strdup(line+5);
+	while( token = strsep(&tmp, ",") )
+		data[i++] = token;
+	res = atoi(data[1]);
+	res += atoi(data[0]+1)<<21;
+	res += 7<<26;
+
+	return res;
+}
+
+int BLEZ(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[2];
+    int res=0;
+    tmp = strdup(line+5);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = atoi(data[1]);
+    res += atoi(data[0]+1)<<21;
+    res += 6<<26;
+
+    return res;
+}
+
+int BNE(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[3];
+    int res=0;
+    tmp = strdup(line+4);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = atoi(data[2]);
+    res += atoi(data[1]+1)<<16;
+    res += atoi(data[0]+1)<<21;
+    res += 5<<26;
+
+    return res;
+}
+
+int DIV(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[2];
+    int res=0;
+    tmp = strdup(line+4);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 26;
+    res += atoi(data[1]+1)<<16;
+    res += atoi(data[0]+1)<<21;
+
+    return res;
+}
+
+int J(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[1];
+    int res=0;
+    tmp = strdup(line+2);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = atoi(data[0]);
+    res += 2<<26;
+
+    return res;
+}
+
+int JAL(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[1];
+    int res=0;
+    tmp = strdup(line+4);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = atoi(data[0]);
+    res += 3<<26;
+
+    return res;
+}
+
+int JR(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[1];
+    int res=0;
+    tmp = strdup(line+3);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 8;
+    res += atoi(data[0]+1)<<21;
+
+    return res;
+}
+
+int LUI(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[2];
+    int res=0;
+    tmp = strdup(line+4);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = atoi(data[1]);
+    res += atoi(data[0]+1)<<16;
+    res += 15<<26;
+
+    return res;
+}
+
+int LW(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[2];
+    int res=0;
+    tmp = strdup(line+3);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = atoi(data[1]);
+    res += atoi(data[0]+1)<<16;
+    res += 35<<26;
+
+    return res;
+}
+
+int MFHI(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[1];
+    int res=0;
+    tmp = strdup(line+5);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 16;
+    res += atoi(data[0]+1)<<11;
+
+    return res;
+}
+
+int MFLO(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[1];
+    int res=0;
+    tmp = strdup(line+5);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 18;
+    res += atoi(data[0]+1)<<11;
+
+    return res;
+}
+
+int MULT(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[2];
+    int res=0;
+    tmp = strdup(line+5);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 24;
+    res += atoi(data[1]+1)<<16;
+    res += atoi(data[0]+1)<<21;
+
+    return res;
+}
+
+int NOP(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[1];
+    int res=0;
+    tmp = strdup(line+4);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 0;
+    return res;
+}
+
+int OR(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[3];
+    int res=0;
+    tmp = strdup(line+3);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 37;
+    res += atoi(data[0]+1)<<11;
+    res += atoi(data[2]+1)<<16;
+    res += atoi(data[1]+1)<<21;
+
+    return res;
+}
+
+int ROTR(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[3];
+    int res=0;
+    tmp = strdup(line+5);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 2;
+    res += atoi(data[2]+1)<<6;
+    res += atoi(data[0]+1)<<11;
+    res += atoi(data[1]+1)<<16;
+    res += 1<<21;
+
+    return res;
+}
+
+int SLL(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[3];
+    int res=0;
+    tmp = strdup(line+4);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 0;
+    res += atoi(data[2]+1)<<6;
+    res += atoi(data[0]+1)<<11;
+    res += atoi(data[1]+1)<<16;
+
+    return res;
+}
+
+int SLT(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[3];
+    int res=0;
+    tmp = strdup(line+4);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 42;
+    res += atoi(data[0]+1)<<11;
+    res += atoi(data[2]+1)<<16;
+    res += atoi(data[1]+1)<<21;
+
+    return res;
+}
+
+int SRL(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[3];
+    int res=0;
+    tmp = strdup(line+4);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 2;
+    res += atoi(data[2]+1)<<6;
+    res += atoi(data[0]+1)<<11;
+    res += atoi(data[1]+1)<<16;
+    res += 1<<21;
+
+    return res;
+}
+
+int SUB(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[3];
+    int res=0;
+    tmp = strdup(line+4);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 34;
+    res += atoi(data[0]+1)<<11;
+    res += atoi(data[2]+1)<<16;
+    res += atoi(data[1]+1)<<21;
+
+    return res;
+}
+
+int SW(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[2];
+    int res=0;
+    tmp = strdup(line+3);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = atoi(data[1]);
+    res += atoi(data[0]+1)<<16;
+    res += 43<<26;
+
+    return res;
+}
+
+int SYSCALL(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[1];
+    int res=0;
+    tmp = strdup(line+8);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 12;
+
+    return res;
+}
+
+int XOR(char* line)
+{
+    char* token = NULL;
+    char* tmp = NULL;
+    int i=0;
+    char* data[3];
+    int res=0;
+    tmp = strdup(line+4);
+    while( token = strsep(&tmp, ",") )
+        data[i++] = token;
+    res = 38;
+    res += atoi(data[0]+1)<<11;
+    res += atoi(data[2]+1)<<16;
+    res += atoi(data[1]+1)<<21;
+
+    return res;
 }
 
 int evaluate(char* opcode, char* line)
@@ -65,137 +491,85 @@ int evaluate(char* opcode, char* line)
 	char* data = malloc(2);
 	int res;
 	if(strcmp(opcode, "ADD") == 0)
-	{
-        data[0] = 0x20;
-    	data[1] = 3;
-    }
+		res = ADD(line);
+
     else if(strcmp(opcode, "ADDI") == 0)
-    	res = addi(line);
+    	res = ADDI(line);
 
     else if(strcmp(opcode, "AND") == 0)
-    {
-        data[0] = 0x24;
-        data[1] = 3;
-    }
+    	res = AND(line);
+
     else if(strcmp(opcode, "BEQ") == 0)
-    {
-        data[0] = 0x4;
-        data[1] = 3;
-    }
+    	res = BEQ(line);
+
     else if(strcmp(opcode, "BGTZ") == 0)
-    {
-        data[0] = 0x7;
-        data[1] = 2;
-    }
+    	res = BGTZ(line);
+
     else if(strcmp(opcode, "BLEZ") == 0)
-    {
-        data[0] = 0x6;
-        data[1] = 2;
-    }
+        res = BLEZ(line);
+
     else if(strcmp(opcode, "BNE") == 0)
-    {
-        data[0] = 0x5;
-        data[1] = 3;
-    }
+        res = BNE(line);
+
     else if(strcmp(opcode, "DIV") == 0)
-    {
-        data[0] = 0x1a;
-        data[1] = 2;
-    }
+        res = DIV(line);
+
     else if(strcmp(opcode, "J") == 0)
-    {
-        data[0] = 0x2;
-        data[1] = 1;
-    }
+        res = J(line);
+
     else if(strcmp(opcode, "JAL") == 0)
-    {
-        data[0] = 0x3;
-        data[1] = 1;
-    }
+        res = JAL(line);
+
     else if(strcmp(opcode, "JR") == 0)
-    {
-        data[0] = 0x8;
-        data[1] = 1;
-    }
+        res = JR(line);
+
     else if(strcmp(opcode, "LUI") == 0)
-    {
-        data[0] = 0xf;
-        data[1] = 2;
-    }
+        res = LUI(line);
+
     else if(strcmp(opcode, "LW") == 0)
-    {
-        data[0] = 0x23;
-        data[1] = 2;
-    }
+        res = LW(line);
+
     else if(strcmp(opcode, "MFHI") == 0)
-    {
-        data[0] = 0x10;
-        data[1] = 1;
-    }
+        res = MFHI(line);
+
     else if(strcmp(opcode, "MFLO") == 0)
-    {
-        data[0] = 0x12;
-        data[1] = 1;
-    }
+        res = MFLO(line);
+
     else if(strcmp(opcode, "MULT") == 0)
-    {
-        data[0] = 0x18;
-        data[1] = 2;
-    }
+        res = MULT(line);
+
     else if(strcmp(opcode, "NOP") == 0)
-    {
-        data[0] = 0;
-        data[1] = 0;
-    }
+        res = NOP(line);
+
     else if(strcmp(opcode, "OR") == 0)
-    {
-        data[0] = 0x25;
-        data[1] = 3;
-    }
+        res = OR(line);
+
     else if(strcmp(opcode, "ROTR") == 0)
-    {
-        data[0] = 0x2;
-        data[1] = 3;
-    }
+        res = ROTR(line);
+
     else if(strcmp(opcode, "SLL") == 0)
-    {
-        data[0] = 0;
-        data[1] = 3;
-    }
+        res = SLL(line);
+
     else if(strcmp(opcode, "SLT") == 0)
-    {
-        data[0] = 0x2a;
-        data[1] = 3;
-    }
+        res = SLT(line);
+
     else if(strcmp(opcode, "SRL") == 0)
-    {
-        data[0] = 0x2;
-        data[1] = 3;
-    }
+        res = SRL(line);
+
     else if(strcmp(opcode, "SUB") == 0)
-    {
-        data[0] = 0x22;
-        data[1] = 3;
-    }
+        res = SUB(line);
+
     else if(strcmp(opcode, "SW") == 0)
-    {
-        data[0] = 0x2b;
-        data[1] = 2;
-    }
+        res = SW(line);
+
     else if(strcmp(opcode, "SYSCALL") == 0)
-    {
-        data[0] = 0xc;
-        data[1] = 0;
-    }
+        res = SYSCALL(line);
+
     else if(strcmp(opcode, "XOR") == 0)
-    {
-        data[0] = 0x26;
-        data[1] = 3;
-    }
+        res = XOR(line);
+
     else
-    {
-    	data[0] = 0xff;
-    	data[1] = 0;
-    }
+        res = -1;
+
     return res;
 }
