@@ -1,0 +1,4 @@
+Récupérer une ligne
+La séparer si " " ou ","
+Convertir en hexa
+Quand la ligne est terminée, écrire en output
