@@ -23,7 +23,7 @@ void chartohex(FILE* input, FILE* output)
 	char* token = NULL;
 	char* tmp = NULL;
 	char* separators = " ,\n";
-	char* opcode;
+	int instruction;
 	int compteur;
 	while( fgets(line, sizeof line, input ) != NULL)
 	{
@@ -31,35 +31,47 @@ void chartohex(FILE* input, FILE* output)
 		tmp = strdup(line);
 		token = strsep(&tmp, separators);
 		printf("%s ", token);
-		opcode = evaluate(token);
-		printf("%d, %d ", opcode[0], opcode[1]);
-
-		
-
-
-		while((token = strsep(&tmp, separators)) != NULL)
-		{
-			printf("%s", token);
-			compteur++;
-		}
-		printf("cpt : %d\n", compteur);
-		printf("\n");
+		instruction = evaluate(token, line);
+		fprintf(output, "%08x\n", instruction);
 	}
 }
 
-char* evaluate(char* opcode)
+int addi(char* line)
+{
+	char* token = NULL; 
+	char* tmp = NULL;
+	char* separators = ",";
+	int compteur = 0;
+	int i=0;
+	char* data[3];
+	int res=0;
+	tmp = strdup(line+5);
+	printf("\n%s\n", tmp);
+	while( token = strsep(&tmp, ",") )
+		data[i++] = token;
+
+	res = atoi(data[2]);
+	res += atoi(data[0]+1)<<16;
+	res += atoi(data[1]+1)<<21;
+	res += 8<<26;
+	printf("%08x\n", res);
+
+	return res;
+
+}
+
+int evaluate(char* opcode, char* line)
 {
 	char* data = malloc(2);
+	int res;
 	if(strcmp(opcode, "ADD") == 0)
 	{
         data[0] = 0x20;
     	data[1] = 3;
     }
     else if(strcmp(opcode, "ADDI") == 0)
-    {
-        data[0] = 0x8;
-        data[1] = 3;
-    }
+    	res = addi(line);
+
     else if(strcmp(opcode, "AND") == 0)
     {
         data[0] = 0x24;
@@ -185,5 +197,5 @@ char* evaluate(char* opcode)
     	data[0] = 0xff;
     	data[1] = 0;
     }
-    return data;
+    return res;
 }

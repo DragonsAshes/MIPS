@@ -25,6 +25,10 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
+	/*char *token = NULL, *tmp = NULL;
+	tmp = strdup("cazou yano pissssiine alllez SANDY");
+	while((token = strsep(&tmp, " ")) != NULL)
+		printf("%s\n", token);*/
 
 	readfile(input);
 	printf("passage à la fonction chartohex\n");

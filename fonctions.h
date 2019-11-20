@@ -4,4 +4,4 @@
 
 void readfile(FILE* input);
 void chartohex(FILE* input, FILE* output);
-char* evaluate(char* opcode);
+int evaluate(char* opcode, char* line);
