@@ -25,8 +25,10 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
+
 	readfile(input);
 	printf("passage à la fonction chartohex\n");
+
 	chartohex(input, output);
 
 	printf("Tout s'est bien passé\n");
