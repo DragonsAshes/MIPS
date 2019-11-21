@@ -29,8 +29,13 @@ void encode(FILE* input, FILE* output)
 	{
 		compteur = 0;
 		tmp = strdup(line);
+        while(*tmp == ' ')
+            tmp++;
+        printf("\n%s\n", tmp);
 		token = strsep(&tmp, separators);
 		instruction = evaluate(token, line);
+        if(instruction == -1)
+            continue;
 		fprintf(output, "%08x\n", instruction);
 	}
 }
@@ -65,7 +70,10 @@ int ADDI(char* line) //rajouter une sécurité (nb d'arguments)
 	int res=0;
 	tmp = strdup(line+5);
 	while( token = strsep(&tmp, ",") )
+    {
 		data[i++] = token;
+        printf("%s\n", data[i-1]);
+    }
 	res = atoi(data[2]);
 	res += atoi(data[0]+1)<<16;
 	res += atoi(data[1]+1)<<21;
@@ -355,7 +363,7 @@ int ROTR(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 2;
-    res += atoi(data[2]+1)<<6;
+    res += atoi(data[2])<<6;
     res += atoi(data[0]+1)<<11;
     res += atoi(data[1]+1)<<16;
     res += 1<<21;
