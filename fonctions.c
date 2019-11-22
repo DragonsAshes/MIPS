@@ -60,7 +60,7 @@ int ADD(char* line)
 	res += atoi(data[0]+1)<<11;
 	res += atoi(data[2]+1)<<16;
 	res += atoi(data[1]+1)<<21;
-
+    
 	return res;
 }
 
