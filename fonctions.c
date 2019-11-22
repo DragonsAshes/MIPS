@@ -29,11 +29,13 @@ void encode(FILE* input, FILE* output)
 	{
 		compteur = 0;
 		tmp = strdup(line);
+        printf("\nyano = %s\n", tmp);
         while(*tmp == ' ')
             tmp++;
-        printf("\n%s\n", tmp);
+        printf("\ncazou = %s\n", tmp);
 		token = strsep(&tmp, separators);
-		instruction = evaluate(token, line);
+        printf("token = %s && %s\n", token, tmp);
+		instruction = evaluate(token, tmp);
         if(instruction == -1)
             continue;
 		fprintf(output, "%08x\n", instruction);
@@ -47,7 +49,7 @@ int ADD(char* line)
 	int i = 0;
 	char* data[3];
 	int res = 0;
-	tmp = strdup(line+4);
+	tmp = strdup(line);
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
 	res = 32;
@@ -68,11 +70,11 @@ int ADDI(char* line) //rajouter une sécurité (nb d'arguments)
 	int i=0;
 	char* data[3];
 	int res=0;
-	tmp = strdup(line+5);
+	tmp = strdup(line);
 	while( token = strsep(&tmp, ",") )
     {
 		data[i++] = token;
-        printf("%s\n", data[i-1]);
+        printf("plop =%s\n", data[i-1]);
     }
 	res = atoi(data[2]);
 	res += atoi(data[0]+1)<<16;
@@ -90,7 +92,7 @@ int AND(char* line)
 	int i=0;
 	char* data[3];
 	int res=0;
-	tmp = strdup(line+4);
+	tmp = strdup(line);
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
 	res = 36;
@@ -109,7 +111,7 @@ int BEQ(char* line)
 	int i=0;
 	char* data[3];
 	int res=0;
-	tmp = strdup(line+4);
+	tmp = strdup(line);
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
 	res = atoi(data[2]);
@@ -127,7 +129,7 @@ int BGTZ(char* line)
 	int i=0;
 	char* data[2];
 	int res=0;
-	tmp = strdup(line+5);
+	tmp = strdup(line);
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
 	res = atoi(data[1]);
@@ -144,7 +146,7 @@ int BLEZ(char* line)
     int i=0;
     char* data[2];
     int res=0;
-    tmp = strdup(line+5);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[1]);
@@ -161,7 +163,7 @@ int BNE(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line+4);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[2]);
@@ -179,7 +181,7 @@ int DIV(char* line)
     int i=0;
     char* data[2];
     int res=0;
-    tmp = strdup(line+4);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 26;
@@ -196,7 +198,7 @@ int J(char* line)
     int i=0;
     char* data[1];
     int res=0;
-    tmp = strdup(line+2);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[0]);
@@ -212,7 +214,7 @@ int JAL(char* line)
     int i=0;
     char* data[1];
     int res=0;
-    tmp = strdup(line+4);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[0]);
@@ -228,7 +230,7 @@ int JR(char* line)
     int i=0;
     char* data[1];
     int res=0;
-    tmp = strdup(line+3);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 8;
@@ -244,7 +246,7 @@ int LUI(char* line)
     int i=0;
     char* data[2];
     int res=0;
-    tmp = strdup(line+4);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[1]);
@@ -261,7 +263,7 @@ int LW(char* line)
     int i=0;
     char* data[2];
     int res=0;
-    tmp = strdup(line+3);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[1]);
@@ -278,7 +280,7 @@ int MFHI(char* line)
     int i=0;
     char* data[1];
     int res=0;
-    tmp = strdup(line+5);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 16;
@@ -294,7 +296,7 @@ int MFLO(char* line)
     int i=0;
     char* data[1];
     int res=0;
-    tmp = strdup(line+5);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 18;
@@ -310,7 +312,7 @@ int MULT(char* line)
     int i=0;
     char* data[2];
     int res=0;
-    tmp = strdup(line+5);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 24;
@@ -327,7 +329,7 @@ int NOP(char* line)
     int i=0;
     char* data[1];
     int res=0;
-    tmp = strdup(line+4);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 0;
@@ -341,7 +343,7 @@ int OR(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line+3);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 37;
@@ -359,7 +361,7 @@ int ROTR(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line+5);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 2;
@@ -378,7 +380,7 @@ int SLL(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line+4);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 0;
@@ -396,7 +398,7 @@ int SLT(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line+4);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 42;
@@ -414,7 +416,7 @@ int SRL(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line+4);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 2;
@@ -433,7 +435,7 @@ int SUB(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line+4);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 34;
@@ -451,7 +453,7 @@ int SW(char* line)
     int i=0;
     char* data[2];
     int res=0;
-    tmp = strdup(line+3);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[1]);
@@ -468,7 +470,7 @@ int SYSCALL(char* line)
     int i=0;
     char* data[1];
     int res=0;
-    tmp = strdup(line+8);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 12;
@@ -483,7 +485,7 @@ int XOR(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line+4);
+    tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 38;
