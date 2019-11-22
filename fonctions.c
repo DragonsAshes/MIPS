@@ -22,22 +22,25 @@ void encode(FILE* input, FILE* output)
 	char line[128];
 	char* token = NULL;
 	char* tmp = NULL;
-	char* separators = " ,\n";
+	char* separators = " ,\n\r";
 	int instruction;
 	int compteur;
+    int i = 0;
 	while( fgets(line, sizeof line, input ) != NULL)
 	{
 		compteur = 0;
 		tmp = strdup(line);
-        printf("\nyano = %s\n", tmp);
         while(*tmp == ' ')
             tmp++;
-        printf("\ncazou = %s\n", tmp);
 		token = strsep(&tmp, separators);
-        printf("token = %s && %s\n", token, tmp);
+        printf("test=%s&\n", token);
 		instruction = evaluate(token, tmp);
-        if(instruction == -1)
+        if(instruction == -1){
+            printf("ligne vide\n");
             continue;
+        }
+        printf("%d / %08x\n",i, instruction);
+        i++;
 		fprintf(output, "%08x\n", instruction);
 	}
 }
@@ -57,7 +60,6 @@ int ADD(char* line)
 	res += atoi(data[0]+1)<<11;
 	res += atoi(data[2]+1)<<16;
 	res += atoi(data[1]+1)<<21;
-	printf("%08x\n", res);
 
 	return res;
 }
@@ -72,10 +74,7 @@ int ADDI(char* line) //rajouter une sécurité (nb d'arguments)
 	int res=0;
 	tmp = strdup(line);
 	while( token = strsep(&tmp, ",") )
-    {
 		data[i++] = token;
-        printf("plop =%s\n", data[i-1]);
-    }
 	res = atoi(data[2]);
 	res += atoi(data[0]+1)<<16;
 	res += atoi(data[1]+1)<<21;
@@ -328,7 +327,7 @@ int NOP(char* line)
     char* tmp = NULL;
     int i=0;
     char* data[1];
-    int res=0;
+    int res;
     tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
@@ -384,7 +383,7 @@ int SLL(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 0;
-    res += atoi(data[2]+1)<<6;
+    res += atoi(data[2])<<6;
     res += atoi(data[0]+1)<<11;
     res += atoi(data[1]+1)<<16;
 
@@ -420,10 +419,9 @@ int SRL(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 2;
-    res += atoi(data[2]+1)<<6;
+    res += atoi(data[2])<<6;
     res += atoi(data[0]+1)<<11;
     res += atoi(data[1]+1)<<16;
-    res += 1<<21;
 
     return res;
 }
