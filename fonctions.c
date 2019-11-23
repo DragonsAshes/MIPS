@@ -1,5 +1,5 @@
 #include "fonctions.h"
-
+//Erreur sur BGTZ
 
 void readfile(FILE* input)
 {
