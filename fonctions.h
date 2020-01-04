@@ -1,8 +1,13 @@
+#ifndef FONCTIONS_H
+#define FONCTIONS_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "register.h"
+
 #include "memory.h"
+#include "register.h"
+
 
 void readfile(FILE* input);
 void encode(FILE* input, FILE* output);
@@ -34,3 +39,7 @@ int SUB(char* line);
 int SW(char* line);
 int SYSCALL(char* line);
 int XOR(char* line);
+
+void decode(unsigned int hexa);
+
+#endif

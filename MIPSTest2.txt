@@ -1,0 +1,20 @@
+#CAZOU YANO 2
+LUI $1,1
+SUB $sp,$sp,4   # alloue un mot sur la pile
+SW $1, 0($sp)    #ecrit sur le sommet de la pile
+LUI $6,5
+ADD $6,$6,$1
+JR $6
+BLEZ $1, -2
+SUB $10,$6,$1 
+MULT $10,$1
+MFHI $15
+MFLO $16
+LW $10,10($0)
+ADDI $5,$1,4
+OR $9,$6,$5
+XOR $8,$6,$5
+AND $7,$6,$5
+ROTR $16,$16,16
+SLL $17,$1,8
+SLT $1,$17,$16

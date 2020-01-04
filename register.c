@@ -1,152 +1,136 @@
 #include "register.h"
 #include "memory.h"
 
+static registers regs;
 
-static registers regs; //On définit une variable global pour que toutes les fonctions y aient accès.
-
-void initialize_regs()
+void initRegisters()
 {
-	for(int i = 0; i < 32; i++)
-		regs.allreg[i] = 0;
-	regs.pc = 0;
+	int i;
+	for( i = 0; i < NB_REGS; i++)
+		regs.general[i] = 0;
+	regs.pc = REG_MEM;
 	regs.hi = 0;
 	regs.lo = 0;
 }
 
-void print_regs()
+int alias_to_nbr(char* reg_name)
 {
-	for(int i = 0; i < 32; i++)
-		printf("r%d : %d\n", i, regs.allreg[i]);
-	printf("pc : %d\nhi : %d\nlo : %d", regs.pc, regs.hi, regs.lo);
+	int nbr;
+	if (!strcmp(reg_name, "zero"))
+		nbr = 0;
+	else if (!strcmp(reg_name, "at"))
+		nbr = 1;
+	else if (!strcmp(reg_name, "gp"))
+		nbr = 28;
+	else if (!strcmp(reg_name, "sp"))
+		nbr = 29;
+	else if (!strcmp(reg_name, "fp"))
+		nbr = 30;
+	else if (!strcmp(reg_name, "ra"))
+		nbr = 31;
+	else if (reg_name[0] == 'v')
+		nbr = 2+atoi(reg_name+1);
+	else if (reg_name[0] == 'a')
+		nbr = 4+atoi(reg_name+1);
+	else if (reg_name[0] == 't')
+		nbr = 8+(atoi(reg_name+1) < 8 ? atoi(reg_name+1) : (8+atoi(reg_name+1)));
+	else if (reg_name[0] == 's')
+		nbr = 16+atoi(reg_name+1);
+	else if (reg_name[0] == 'k')
+		nbr = 26+atoi(reg_name+1);
+	else
+		nbr = atoi(reg_name);
+
+	return nbr;
 }
 
-void reg_add(char* data)
+
+//Faire la sécurité en cas d'overflow
+void set_reg(char* instruction, char r1, char r2, char r3, short imm)
 {
-	regs.allreg[(data[0]+1)] = regs.allreg[(data[1]+1)] + regs.allreg[(data[2]+1)];	
-	//Vérifier l'overflow
-}
-
-void reg_addi(char* data)
-{
-	regs.allreg[(data[0]+1)] = regs.allreg[(data[1]+1)] + regs.allreg[data[2]];	
-	//Vérifier l'overflow
-}
-
-void reg_and(char* data)
-{
-	regs.allreg[(data[0]+1)] = regs.allreg[(data[1]+1)] & regs.allreg[(data[2]+1)];	
-}
-
-void reg_beq(char* data)
-{
-
-}
-
-void reg_bgtz(char* data)
-{
-	if( regs.allreg[(data[0]+1)] > 0 )
-		regs.pc += data[1]<<2;
-}
-
-void reg_blez(char* data)
-{
-	if( regs.allreg[(data[0]+1)] <= 0 )
-		regs.pc += data[1]<<2;
-}
-
-void reg_bne(char* data)
-{
-	if( regs.allreg[(data[0]+1)] != regs.allreg[(data[1]+1)] )
-		regs.pc += data[2]<<2;
-}
-
-void reg_div(char* data)
-{
-	regs.hi = regs.allreg[(data[0]+1)]/regs.allreg[(data[1]+1)];
-	regs.lo = regs.allreg[(data[0]+1)]%regs.allreg[(data[1]+1)];
-	//Vérifier les calculs
-}
-
-void reg_j(char* data)
-{
-	regs.pc = data[0]<<2;
-}
-
-void reg_jal(char* data)
-{
-	regs.allreg[31] = regs.pc+8;
-	regs.pc += data[0]<<2;
-}
-
-void reg_jr(char* data)
-{
-	regs.pc = regs.allreg[(data[0]+1)];
-}
-
-void reg_lui(char* data)
-{
-	regs.allreg[(data[0]+1)] = data[1]<<16;
-}
-
-void reg_lw(char* data)
-{
-
-}
-
-void reg_mfhi(char* data)
-{
-	regs.allreg[(data[0]+1)] = regs.hi;
-}
-
-void reg_mflo(char*data)
-{
-	regs.allreg[(data[0]+1)] = regs.lo;	
-}
-
-void reg_mult(char* data) //A vérifier
-{
-	regs.lo = ( regs.allreg[(data[0]+1)]*regs.allreg[(data[1]+1)] )&&0x00ff;
-	regs.hi = ( regs.allreg[(data[0]+1)]*regs.allreg[(data[1]+1)] )>>16;
-}
-
-void reg_or(char* data)
-{
-	regs.allreg[(data[0]+1)] = regs.allreg[(data[1]+1)] | regs.allreg[(data[1]+1)];
-}
-
-void reg_rotr(char* data)
-{
-	regs.allreg[(data[0]+1)] = regs.allreg[(data[1]+1)] >> regs.allreg[(data[2]+1)];
-} //A vérifier
-
-void reg_sll(char* data)
-{
-	regs.allreg[(data[0]+1)] = regs.allreg[(data[1]+1)] << regs.allreg[data[2]];
-}
-
-void reg_slt(char *data)
-{
-	regs.allreg[(data[0]+1)] = regs.allreg[(data[1]+1)] < regs.allreg[(data[2]+1)];
-}
-
-void reg_srl(char* data)
-{
-	regs.allreg[(data[0]+1)] = regs.allreg[(data[1]+1)] >> regs.allreg[data[2]];
-}
-
-void reg_sub(char* data)
-{
-	regs.allreg[(data[0]+1)] = regs.allreg[(data[1]+1)] - regs.allreg[data[2]];
-}
-
-void reg_sw(char* data)
-{
+	if( !strcmp(instruction, "ROTR") )
+		regs.general[r1] = (regs.general[r2] << regs.general[r3]); //Erreur ici
+	else if ( !strcmp(instruction, "ADDI") )
+		regs.general[r1] = regs.general[r2] + imm;
+	else if ( !strcmp(instruction, "ADD") )
+		regs.general[r1] = regs.general[r2] + regs.general[r3];
+	else if ( !strcmp(instruction, "BNE") )
+		regs.pc = ( regs.general[r1] != regs.general[r2] ? (regs.pc+(imm << 2)) : regs.pc);
+	else if ( !strcmp(instruction, "AND") )
+		regs.general[r1] = regs.general[r2] & regs.general[r3];
+	else if ( !strcmp(instruction, "BEQ") )
+		regs.pc = ( regs.general[r1] == regs.general[r2] ? (regs.pc+(imm << 2)) : regs.pc);
+	else if ( !strcmp(instruction, "BGTZ") )
+		regs.pc = ( regs.general[r1] > 0 ? (regs.pc+(imm << 2)) : regs.pc);
+	else if ( !strcmp(instruction, "BLEZ") )
+		regs.pc = (regs.general[r1] <= 0 ? (regs.pc+(imm << 2)) : regs.pc);
+	else if ( !strcmp(instruction, "DIV") ) //Cas ou regs.general[r2] == 0
+	{
+		regs.lo = regs.general[r1] / regs.general[r2];
+		regs.hi = regs.general[r1] % regs.general[r2];
+	}
+	else if ( !strcmp(instruction, "JR") )
+	{
+		print_reg();
+		regs.pc = regs.general[r1] + 4;
+	}
+	else if ( !strcmp(instruction, "LUI") )
+		regs.general[r1] = ( imm << 16 );
+	else if ( !strcmp(instruction, "LW") )
+		regs.general[r1] = readMemory(REG_MEM+(unsigned int)regs.general[r2]+(unsigned int)imm);
+	else if ( !strcmp(instruction, "MFHI") )
+		regs.general[r1] = regs.hi;
+	else if ( !strcmp(instruction, "MFLO") )
+		regs.general[r1] = regs.lo;
+	else if ( !strcmp(instruction, "MULT") )
+	{
+		long prod = regs.general[r1] * regs.general[r2];
+		regs.lo = prod & 0xffffffff;
+		regs.hi = (prod & 0xffffffff00000000) >> 32;
+	}
+	else if ( !strcmp(instruction, "OR") )
+		regs.general[r1] = regs.general[r2] | regs.general[r3];
+	else if ( !strcmp(instruction, "SLL") )
+		regs.general[r1] = regs.general[r2] << r3;
+	else if ( !strcmp(instruction, "SLT") )
+		regs.general[r1] = ( regs.general[r2] < regs.general[r3] );
+	else if ( !strcmp(instruction, "SRL") )
+		regs.general[r1] = ( regs.general[r2] >> r3 );
+	else if ( !strcmp(instruction, "SUB") )
+		regs.general[r1] = regs.general[r2] - regs.general[r3];
+	else if ( !strcmp(instruction, "SW") )
+		write_ins_in_Memory( (REG_MEM+(unsigned int)regs.general[r2]+(unsigned int)imm), regs.general[r1]);
+	else if ( !strcmp(instruction, "XOR") )
+		regs.general[r1] = regs.general[r2] ^ regs.general[r3];
 
 }
 
-//Syscall ??
-
-void reg_xor(char* data)
+void print_reg()
 {
-	regs.allreg[(data[0]+1)] = regs.allreg[(data[1]+1)] ^ regs.allreg[(data[1]+1)];
+	int i;
+	printf("************ REGISTERS STATES ************ \n");
+	for ( i = 0; i < NB_REGS; i++)
+	{
+		if( i%4 == 0)
+			printf("\n");
+		printf("$%d = %d           ", i, regs.general[i]);
+
+	}
+	printf("\n");
+	printf("pc = %d || hi = %d || lo = %d \n\n", regs.pc, regs.hi, regs.lo);	
+}
+
+void print_one_reg(char index)
+{
+	printf("\n\nr%d = %d\n\n", index, regs.general[index]);
+}
+
+int get_pc()
+{
+	return regs.pc;
+}
+
+void set_pc()
+{
+	regs.pc += 4;
 }

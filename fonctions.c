@@ -1,5 +1,5 @@
 #include "fonctions.h"
-//Erreur sur BGTZ
+
 
 void readfile(FILE* input)
 {
@@ -26,6 +26,7 @@ void encode(FILE* input, FILE* output)
 	int instruction;
 	int compteur;
     int i = 0;
+    unsigned int offset = 0;
 	while( fgets(line, sizeof line, input ) != NULL)
 	{
 		compteur = 0;
@@ -33,16 +34,17 @@ void encode(FILE* input, FILE* output)
         while(*tmp == ' ')
             tmp++;
 		token = strsep(&tmp, separators);
-        printf("test=%s&\n", token);
 		instruction = evaluate(token, tmp);
         if(instruction == -1){
-            printf("ligne vide\n");
             continue;
         }
         printf("%d / %08x\n",i, instruction);
         i++;
 		fprintf(output, "%08x\n", instruction);
+        write_ins_in_Memory( (DATA_MEM+offset), instruction );
+        offset += 4;
 	}
+    write_ins_in_Memory( (DATA_MEM+offset), 0xffffffff);
 }
 
 int ADD(char* line)
@@ -60,7 +62,7 @@ int ADD(char* line)
 	res += atoi(data[0]+1)<<11;
 	res += atoi(data[2]+1)<<16;
 	res += atoi(data[1]+1)<<21;
-    
+
 	return res;
 }
 
@@ -76,6 +78,7 @@ int ADDI(char* line) //rajouter une sécurité (nb d'arguments)
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
 	res = atoi(data[2]);
+    res = res & 0x0000ffff;
 	res += atoi(data[0]+1)<<16;
 	res += atoi(data[1]+1)<<21;
 	res += 8<<26;
@@ -114,6 +117,7 @@ int BEQ(char* line)
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
 	res = atoi(data[2]);
+    res = res & 0x0000ffff;
 	res += atoi(data[1]+1)<<16;
 	res += atoi(data[0]+1)<<21;
 	res += 4<<26;
@@ -132,6 +136,7 @@ int BGTZ(char* line)
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
 	res = atoi(data[1]);
+    res = res & 0x0000ffff;
 	res += atoi(data[0]+1)<<21;
 	res += 7<<26;
 
@@ -149,6 +154,7 @@ int BLEZ(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[1]);
+    res = res & 0x0000ffff;
     res += atoi(data[0]+1)<<21;
     res += 6<<26;
 
@@ -166,6 +172,7 @@ int BNE(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[2]);
+    res = res & 0x0000ffff;
     res += atoi(data[1]+1)<<16;
     res += atoi(data[0]+1)<<21;
     res += 5<<26;
@@ -249,6 +256,7 @@ int LUI(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[1]);
+    res = res & 0x0000ffff;
     res += atoi(data[0]+1)<<16;
     res += 15<<26;
 
@@ -266,6 +274,7 @@ int LW(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[1]);
+    res = res & 0x0000ffff;
     res += atoi(data[0]+1)<<16;
     res += 35<<26;
 
@@ -455,6 +464,7 @@ int SW(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[1]);
+    res = res & 0x0000ffff;
     res += atoi(data[0]+1)<<16;
     res += 43<<26;
 
@@ -570,7 +580,7 @@ int evaluate(char* opcode, char* line)
     else if(strcmp(opcode, "SW") == 0)
         res = SW(line);
 
-    else if(strcmp(opcode, "SYSCALL") == 0)
+    else if(strcmp(opcode, "SY SCALL") == 0)
         res = SYSCALL(line);
 
     else if(strcmp(opcode, "XOR") == 0)
@@ -580,4 +590,135 @@ int evaluate(char* opcode, char* line)
         res = -1;
 
     return res;
+}
+
+void decode(unsigned int hexa)
+{
+    //Réalisation des masques de décodage
+    if(hexa == 0)
+    {
+        printf("{NOP}\n");
+        return;
+    }
+    char type;
+    char op = 0, rs = 0, rt = 0, rd = 0, sa = 0;
+    short imm = 0;
+    if( (hexa & 0xfc000000) == 0 ) //On distingue le type R des deux autres types.
+    {
+        type = 'R';
+        op = hexa & 0x3f;
+        sa = (hexa >> 6) & 0x1f;
+        rd = (hexa >> 11) & 0x1f;
+        rt = (hexa >> 16) & 0x1f;
+        rs = (hexa >> 21) & 0x1f; 
+
+        switch(op)
+        {
+            case 2:
+                if( rs == 1 )
+                {
+                    printf("{ROTR $%d, $%d, $%d}\n", rd, rt, sa);
+                    set_reg("ROTR", rd, rt, sa, 0);
+                }
+                else{
+                    printf("{SRL $%d, $%d, $%d}\n", rd, rt, sa);
+                    set_reg("SRL", rd, rt, sa, 0);
+                }
+                break;
+            case 32:
+                printf("{ADD $%d, $%d, $%d}\n", rd, rs, rt);
+                set_reg("ADD", rd, rs, rt, 0);
+                break;
+            case 36:
+                printf("{AND $%d, $%d, $%d}\n", rd, rs, rt);
+                set_reg("AND", rd, rs, rt, 0);
+                break;
+            case 26:
+                printf("{DIV $%d, $%d}\n", rs, rt);
+                set_reg("DIV", rs, rt, 0, 0);
+                break;
+            case 8:
+                printf("{JR $%d}\n", rs);
+                set_reg("JR", rs, 0, 0, 0);
+                break;
+            case 16:
+                printf("{MFHI $%d}\n", rd);
+                set_reg("MFHI", rd, 0, 0, 0);
+                break;
+            case 18:
+                printf("{MFLO $%d}\n", rd);
+                set_reg("MFLO", rd, 0, 0, 0);
+                break;
+            case 24:
+                printf("{MULT $%d, $%d}\n", rs, rt);
+                set_reg("MULT", rs, rt, 0, 0);
+                break;
+            case 37:
+                printf("{OR $%d, $%d, $%d}\n", rd, rs, rt);
+                set_reg("OR", rd, rs, rt, 0);
+                break;
+            case 0:
+                printf("{SLL $%d, $%d, $%d}\n", rd, rs, sa);
+                set_reg("SLL", rd, rt, sa, 0);
+                break;
+            case 42:
+                printf("{SLT $%d, $%d, $%d}\n", rd, rs, rt);
+                set_reg("SLT", rd, rs, rt, 0);
+                break;
+            case 34:
+                printf("{SUB $%d, $%d, $%d}\n", rd, rs, rt);
+                set_reg("SUB", rd, rs, rt, 0);
+                break;
+            case 38:
+                printf("{XOR $%d, $%d, $%d}\n", rd, rs, rt);
+                set_reg("XOR", rd, rs, rt, 0);
+                break;
+        }
+    }
+    //Réaliser un masque pour chaque fonction pour les types I et J
+    else
+    {
+        //Traiter Jump et Jump and link a part
+        op = (hexa & 0xfc000000) >> 26;
+        rs = (hexa >> 21) & 0x1f;
+        rt = (hexa >> 16) & 0x1f;
+        imm = hexa & 0xffff;
+
+        switch(op)
+        {
+            case 8:
+                printf("{ADDI $%d, $%d, %d}\n", rt, rs, imm);
+                set_reg("ADDI", rt, rs, 0, imm);
+                break;
+            case 5:
+                printf("{BNE $%d, $%d, %d}\n", rs, rt, imm);
+                set_reg("BNE", rs, rt, 0, imm);
+                break;
+            case 4:
+                printf("{BEQ $%d, $%d, %d}\n",rs ,rt ,imm);
+                set_reg("BEQ", rs, rt, 0, imm);
+                break;
+            case 7:
+                printf("{BGTZ $%d, %d}\n", rs, imm);
+                set_reg("BGTZ", rs, 0, 0, imm);
+                break;
+            case 6:
+                printf("{BLEZ $%d, %d}\n", rs, imm);
+                set_reg("BLEZ", rs, 0, 0, imm);
+                break;
+            case 15:
+                printf("{LUI $%d, %d}\n", rt, imm);
+                set_reg("LUI", rt, 0, 0, imm);
+                break;
+            case 35:
+                printf("{LW $%d; $%d, %d}\n", rt, rs, imm);
+                set_reg("LW", rt, rs ,0, imm);
+                break;
+            case 43:
+                printf("{SW $%d, $%d, %d}\n", rt, rs, imm);
+                set_reg("SW", rt, rs, 0, imm);
+                break;
+        }
+    }
+
 }
