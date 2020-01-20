@@ -61,7 +61,7 @@ int encode_instruction(char* instruction)
     }
     else{
         code = evaluate(token, instruction);
-        printf("%08x\n", instruction);
+        printf("%08x\n", code);
     }
     return code;
 }
