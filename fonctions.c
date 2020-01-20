@@ -47,6 +47,25 @@ void encode(FILE* input, FILE* output)
     write_ins_in_Memory( (DATA_MEM+offset), 0xffffffff);
 }
 
+int encode_instruction(char* instruction)
+{
+    int code;
+    char* token = NULL;
+    char* separators = " ,\n\r";
+    token = strsep(&instruction, separators);
+    if ( !strcmp(token, "BEQ") || !strcmp(token, "BGTZ") || !strcmp(token, "BNE") || !strcmp(token, "J")
+        || !strcmp(token, "JAL") || !strcmp(token, "JR") )
+    {
+        code = -1;
+        printf("This function can't be used in interactive mode\n");
+    }
+    else{
+        code = evaluate(token, instruction);
+        printf("%08x\n", instruction);
+    }
+    return code;
+}
+
 int ADD(char* line)
 {
 	char* token = NULL;
@@ -580,7 +599,7 @@ int evaluate(char* opcode, char* line)
     else if(strcmp(opcode, "SW") == 0)
         res = SW(line);
 
-    else if(strcmp(opcode, "SY SCALL") == 0)
+    else if(strcmp(opcode, "SYSCALL") == 0)
         res = SYSCALL(line);
 
     else if(strcmp(opcode, "XOR") == 0)

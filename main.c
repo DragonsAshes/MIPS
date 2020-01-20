@@ -2,16 +2,23 @@
 #include "memory.h"
 #include "register.h"
 
-void interactif_mode(int pas)
+void interactif_mode()
 {
-	char* command;
-	char c;
-	do{
+	initMemory();
+	char command[50] = "\0";
+	int instruction;
+	while( strcmp(command, "EXIT")){
 		printf("\nEnter Instruction. Enter 'EXIT' if it's over : ");
-		scanf("%s", command);
-		fflush(stdin);
-		c = getchar();
-	}while( strcmp(command, "EXIT"));
+		fgets(command, 50, stdin);
+
+		//On procède directement à l'exécution, ceci est possible car on traite seulement les instructions en séquences
+		instruction = encode_instruction(command);
+		if( instruction == -1 )
+			continue;
+		decode(instruction);
+		print_reg();
+		printMemory();
+	}
 
 }
 
@@ -73,7 +80,7 @@ int main(int argc, char** argv)
 
 	printf("--------------------------- COMPILATEUR MIPS MILHEIRO PEUBLE Mélissa, FOUCHER Sébastien ---------------------------\n");
 
-	if( argc > 4 )
+	if( argc > 4 || argc == 2)
 	{
 		printf("Erreur lors de l'exécution: format : ./emul-mips ['input file' 'output file' [-pas] ]\n");
 		return -1;
@@ -81,8 +88,6 @@ int main(int argc, char** argv)
 
 	if ( argc == 1 )
 		interactif_mode(0);
-	else if ( argc == 2 )
-		interactif_mode(1);
 	else if ( argc == 3 )
 		non_interactif_mode(argv[1], argv[2], 0);
 	else if ( argc == 4 )

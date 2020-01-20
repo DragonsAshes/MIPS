@@ -12,7 +12,7 @@
 void readfile(FILE* input);
 void encode(FILE* input, FILE* output);
 int evaluate(char* opcode, char* line);
-
+int encode_instruction(char* instruction);
 
 int ADD(char* line);
 int ADDI(char* line);
