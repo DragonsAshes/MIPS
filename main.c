@@ -9,7 +9,7 @@ void interactif_mode()
 	int instruction;
 	while( strcmp(command, "EXIT")){
 		printf("\nEnter Instruction. Enter 'EXIT' if it's over : ");
-		fgets(command, 50, stdin);
+		fgets(command, 50, stdin); //Récupération de ce qui est écrit par l'utilisateur
 
 		//On procède directement à l'exécution, ceci est possible car on traite seulement les instructions en séquences
 		instruction = encode_instruction(command);
@@ -52,7 +52,7 @@ void non_interactif_mode(char* input_file, char* output_file, int pas)
 	{
 		printf("\n PC = %d \n", get_pc());
 		printf("Processing instruction:\n%08x	", hex);
-		set_pc();
+		set_pc();  //On incrémente le PC
 		decode(hex);
 		if( pas )
 		{

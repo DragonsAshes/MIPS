@@ -17,7 +17,7 @@ void readfile(FILE* input)
 
 
 
-void encode(FILE* input, FILE* output)
+void encode(FILE* input, FILE* output)  //Fonction d'encodage pour le mode non interactif
 {
 	char line[128];
 	char* token = NULL;
@@ -27,7 +27,7 @@ void encode(FILE* input, FILE* output)
 	int compteur;
     int i = 0;
     unsigned int offset = 0;
-	while( fgets(line, sizeof line, input ) != NULL)
+	while( fgets(line, sizeof line, input ) != NULL)   //On parcourt tout le fichier contenant le code assembleur
 	{
 		compteur = 0;
 		tmp = strdup(line);
@@ -44,17 +44,17 @@ void encode(FILE* input, FILE* output)
         write_ins_in_Memory( (DATA_MEM+offset), instruction );
         offset += 4;
 	}
-    write_ins_in_Memory( (DATA_MEM+offset), 0xffffffff);
+    write_ins_in_Memory( (DATA_MEM+offset), 0xffffffff);    //On rajoute le EXIT à la fin dans le fichier hexadécimal
 }
 
-int encode_instruction(char* instruction)
+int encode_instruction(char* instruction)  //Fonction d'encodage pour le mode interactif
 {
     int code;
     char* token = NULL;
     char* separators = " ,\n\r";
     token = strsep(&instruction, separators);
     if ( !strcmp(token, "BEQ") || !strcmp(token, "BGTZ") || !strcmp(token, "BNE") || !strcmp(token, "J")
-        || !strcmp(token, "JAL") || !strcmp(token, "JR") )
+        || !strcmp(token, "JAL") || !strcmp(token, "JR") ) //On vérifie que l'instruction est une instruction en séquence
     {
         code = -1;
         printf("This function can't be used in interactive mode\n");
@@ -636,7 +636,7 @@ void decode(unsigned int hexa)
             case 2:
                 if( rs == 1 )
                 {
-                    printf("{ROTR $%d, $%d, $%d}\n", rd, rt, sa);
+                    printf("{ROTR $%d, $%d, %d}\n", rd, rt, sa);
                     set_reg("ROTR", rd, rt, sa, 0);
                 }
                 else{

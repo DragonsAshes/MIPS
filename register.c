@@ -13,7 +13,7 @@ void initRegisters()
 	regs.lo = 0;
 }
 
-int alias_to_nbr(char* reg_name)
+int alias_to_nbr(char* reg_name)  //Fonction permettant de passer du nom du registre à son numéro
 {
 	int nbr;
 	if (!strcmp(reg_name, "zero"))
@@ -45,11 +45,11 @@ int alias_to_nbr(char* reg_name)
 }
 
 
-//Faire la sécurité en cas d'overflow
+
 void set_reg(char* instruction, char r1, char r2, char r3, short imm)
 {
 	if( !strcmp(instruction, "ROTR") )
-		regs.general[r1] = (regs.general[r2] << regs.general[r3]); //Erreur ici
+		regs.general[r1] = (regs.general[r2] >> r3) | (regs.general[r2] << (32-r3));  //r3 représente sa
 	else if ( !strcmp(instruction, "ADDI") )
 		regs.general[r1] = regs.general[r2] + imm;
 	else if ( !strcmp(instruction, "ADD") )
@@ -64,7 +64,7 @@ void set_reg(char* instruction, char r1, char r2, char r3, short imm)
 		regs.pc = ( regs.general[r1] > 0 ? (regs.pc+(imm << 2)) : regs.pc);
 	else if ( !strcmp(instruction, "BLEZ") )
 		regs.pc = (regs.general[r1] <= 0 ? (regs.pc+(imm << 2)) : regs.pc);
-	else if ( !strcmp(instruction, "DIV") ) //Cas ou regs.general[r2] == 0
+	else if ( !strcmp(instruction, "DIV") )
 	{
 		regs.lo = regs.general[r1] / regs.general[r2];
 		regs.hi = regs.general[r1] % regs.general[r2];

@@ -2,7 +2,7 @@
 
 unsigned char* mem;
 
-void initMemory()
+void initMemory()  //Initialisation de la mémoire
 {
 	mem = (unsigned char*)calloc(MEM_SIZE, sizeof(unsigned char));
 }
