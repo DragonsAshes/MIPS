@@ -15,6 +15,7 @@ void initRegisters()
 
 int alias_to_nbr(char* reg_name)  //Fonction permettant de passer du nom du registre à son numéro
 {
+	printf("alias : %s\n", reg_name);
 	int nbr;
 	if (!strcmp(reg_name, "zero"))
 		nbr = 0;
@@ -70,10 +71,7 @@ void set_reg(char* instruction, char r1, char r2, char r3, short imm)
 		regs.hi = regs.general[r1] % regs.general[r2];
 	}
 	else if ( !strcmp(instruction, "JR") )
-	{
-		print_reg();
 		regs.pc = regs.general[r1] + 4;
-	}
 	else if ( !strcmp(instruction, "LUI") )
 		regs.general[r1] = ( imm << 16 );
 	else if ( !strcmp(instruction, "LW") )
@@ -103,6 +101,18 @@ void set_reg(char* instruction, char r1, char r2, char r3, short imm)
 	else if ( !strcmp(instruction, "XOR") )
 		regs.general[r1] = regs.general[r2] ^ regs.general[r3];
 
+}
+
+
+void reg_Jump(char* instruction, int index)
+{
+	if( !strcmp(instruction, "J") )
+		regs.pc = index;
+	else if ( !strcmp(instruction, "JAL") )
+	{
+		regs.general[31] = regs.pc;
+		regs.pc = index;
+	}
 }
 
 void print_reg()

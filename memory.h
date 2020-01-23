@@ -8,6 +8,8 @@
 #define DATA_MEM 0x00000000
 #define REG_MEM 0x00000100
 
+unsigned char* mem;
+
 void initMemory();
 
 void write_ins_in_Memory(unsigned int addr, unsigned int instruction);

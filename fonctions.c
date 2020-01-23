@@ -30,12 +30,13 @@ void encode(FILE* input, FILE* output)  //Fonction d'encodage pour le mode non i
 	while( fgets(line, sizeof line, input ) != NULL)   //On parcourt tout le fichier contenant le code assembleur
 	{
 		compteur = 0;
-		tmp = strdup(line);
+		char* tofree = tmp = strdup(line);
         while(*tmp == ' ')
             tmp++;
 		token = strsep(&tmp, separators);
 		instruction = evaluate(token, tmp);
         if(instruction == -1){
+            free(tofree);
             continue;
         }
         printf("%d / %08x\n",i, instruction);
@@ -43,6 +44,7 @@ void encode(FILE* input, FILE* output)  //Fonction d'encodage pour le mode non i
 		fprintf(output, "%08x\n", instruction);
         write_ins_in_Memory( (DATA_MEM+offset), instruction );
         offset += 4;
+        free(tofree);
 	}
     write_ins_in_Memory( (DATA_MEM+offset), 0xffffffff);    //On rajoute le EXIT à la fin dans le fichier hexadécimal
 }
@@ -73,7 +75,7 @@ int ADD(char* line)
 	int i = 0;
 	char* data[3];
 	int res = 0;
-	tmp = strdup(line);
+	char* tofree = tmp = strdup(line);
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
 	res = 32;
@@ -81,7 +83,7 @@ int ADD(char* line)
 	res += atoi(data[0]+1)<<11;
 	res += atoi(data[2]+1)<<16;
 	res += atoi(data[1]+1)<<21;
-
+    free(tofree);
 	return res;
 }
 
@@ -93,15 +95,15 @@ int ADDI(char* line) //rajouter une sécurité (nb d'arguments)
 	int i=0;
 	char* data[3];
 	int res=0;
-	tmp = strdup(line);
+	char* tofree = tmp = strdup(line);
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
-	res = atoi(data[2]);
+	res = alias_to_nbr(data[2]);
     res = res & 0x0000ffff;
-	res += atoi(data[0]+1)<<16;
-	res += atoi(data[1]+1)<<21;
+	res += alias_to_nbr(data[0]+1)<<16;
+	res += alias_to_nbr(data[1]+1)<<21;
 	res += 8<<26;
-
+    free(tofree);
 	return res;
 
 }
@@ -113,7 +115,7 @@ int AND(char* line)
 	int i=0;
 	char* data[3];
 	int res=0;
-	tmp = strdup(line);
+	char* tofree = tmp = strdup(line);
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
 	res = 36;
@@ -121,7 +123,7 @@ int AND(char* line)
 	res += atoi(data[0]+1)<<11;
 	res += atoi(data[2]+1)<<16;
 	res += atoi(data[1]+1)<<21;
-
+    free(tofree);
 	return res;
 }
 
@@ -132,7 +134,7 @@ int BEQ(char* line)
 	int i=0;
 	char* data[3];
 	int res=0;
-	tmp = strdup(line);
+	char* tofree = tmp = strdup(line);
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
 	res = atoi(data[2]);
@@ -140,7 +142,7 @@ int BEQ(char* line)
 	res += atoi(data[1]+1)<<16;
 	res += atoi(data[0]+1)<<21;
 	res += 4<<26;
-
+    free(tofree);
 	return res;
 }
 
@@ -151,14 +153,14 @@ int BGTZ(char* line)
 	int i=0;
 	char* data[2];
 	int res=0;
-	tmp = strdup(line);
+	char* tofree = tmp = strdup(line);
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
 	res = atoi(data[1]);
     res = res & 0x0000ffff;
 	res += atoi(data[0]+1)<<21;
 	res += 7<<26;
-
+    free(tofree);
 	return res;
 }
 
@@ -169,14 +171,14 @@ int BLEZ(char* line)
     int i=0;
     char* data[2];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[1]);
     res = res & 0x0000ffff;
     res += atoi(data[0]+1)<<21;
     res += 6<<26;
-
+    free(tofree);
     return res;
 }
 
@@ -187,7 +189,7 @@ int BNE(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[2]);
@@ -195,7 +197,7 @@ int BNE(char* line)
     res += atoi(data[1]+1)<<16;
     res += atoi(data[0]+1)<<21;
     res += 5<<26;
-
+    free(tofree);
     return res;
 }
 
@@ -206,13 +208,13 @@ int DIV(char* line)
     int i=0;
     char* data[2];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 26;
     res += atoi(data[1]+1)<<16;
     res += atoi(data[0]+1)<<21;
-
+    free(tofree);
     return res;
 }
 
@@ -223,12 +225,12 @@ int J(char* line)
     int i=0;
     char* data[1];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[0]);
     res += 2<<26;
-
+    free(tofree);
     return res;
 }
 
@@ -239,12 +241,12 @@ int JAL(char* line)
     int i=0;
     char* data[1];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[0]);
     res += 3<<26;
-
+    free(tofree);
     return res;
 }
 
@@ -255,12 +257,12 @@ int JR(char* line)
     int i=0;
     char* data[1];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 8;
     res += atoi(data[0]+1)<<21;
-
+    free(tofree);
     return res;
 }
 
@@ -271,14 +273,14 @@ int LUI(char* line)
     int i=0;
     char* data[2];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[1]);
     res = res & 0x0000ffff;
     res += atoi(data[0]+1)<<16;
     res += 15<<26;
-
+    free(tofree);
     return res;
 }
 
@@ -289,14 +291,14 @@ int LW(char* line)
     int i=0;
     char* data[2];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[1]);
     res = res & 0x0000ffff;
     res += atoi(data[0]+1)<<16;
     res += 35<<26;
-
+    free(tofree);
     return res;
 }
 
@@ -307,12 +309,12 @@ int MFHI(char* line)
     int i=0;
     char* data[1];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 16;
     res += atoi(data[0]+1)<<11;
-
+    free(tofree);
     return res;
 }
 
@@ -323,12 +325,12 @@ int MFLO(char* line)
     int i=0;
     char* data[1];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 18;
     res += atoi(data[0]+1)<<11;
-
+    free(tofree);
     return res;
 }
 
@@ -339,13 +341,13 @@ int MULT(char* line)
     int i=0;
     char* data[2];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 24;
     res += atoi(data[1]+1)<<16;
     res += atoi(data[0]+1)<<21;
-
+    free(tofree);
     return res;
 }
 
@@ -356,10 +358,11 @@ int NOP(char* line)
     int i=0;
     char* data[1];
     int res;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 0;
+    free(tofree);
     return res;
 }
 
@@ -370,14 +373,14 @@ int OR(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 37;
     res += atoi(data[0]+1)<<11;
     res += atoi(data[2]+1)<<16;
     res += atoi(data[1]+1)<<21;
-
+    free(tofree);
     return res;
 }
 
@@ -388,15 +391,15 @@ int ROTR(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 2;
-    res += atoi(data[2])<<6;
-    res += atoi(data[0]+1)<<11;
-    res += atoi(data[1]+1)<<16;
+    res += alias_to_nbr(data[2])<<6;
+    res += alias_to_nbr(data[0]+1)<<11;
+    res += alias_to_nbr(data[1]+1)<<16;
     res += 1<<21;
-
+    free(tofree);
     return res;
 }
 
@@ -407,14 +410,14 @@ int SLL(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 0;
     res += atoi(data[2])<<6;
     res += atoi(data[0]+1)<<11;
     res += atoi(data[1]+1)<<16;
-
+    free(tofree);
     return res;
 }
 
@@ -425,14 +428,14 @@ int SLT(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 42;
     res += atoi(data[0]+1)<<11;
     res += atoi(data[2]+1)<<16;
     res += atoi(data[1]+1)<<21;
-
+    free(tofree);
     return res;
 }
 
@@ -443,14 +446,14 @@ int SRL(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 2;
     res += atoi(data[2])<<6;
     res += atoi(data[0]+1)<<11;
     res += atoi(data[1]+1)<<16;
-
+    free(tofree);
     return res;
 }
 
@@ -461,14 +464,14 @@ int SUB(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 34;
     res += atoi(data[0]+1)<<11;
     res += atoi(data[2]+1)<<16;
     res += atoi(data[1]+1)<<21;
-
+    free(tofree);
     return res;
 }
 
@@ -479,14 +482,14 @@ int SW(char* line)
     int i=0;
     char* data[2];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = atoi(data[1]);
     res = res & 0x0000ffff;
     res += atoi(data[0]+1)<<16;
     res += 43<<26;
-
+    free(tofree);
     return res;
 }
 
@@ -497,11 +500,11 @@ int SYSCALL(char* line)
     int i=0;
     char* data[1];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 12;
-
+    free(tofree);
     return res;
 }
 
@@ -512,20 +515,19 @@ int XOR(char* line)
     int i=0;
     char* data[3];
     int res=0;
-    tmp = strdup(line);
+    char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 38;
     res += atoi(data[0]+1)<<11;
     res += atoi(data[2]+1)<<16;
     res += atoi(data[1]+1)<<21;
-
+    free(tofree);
     return res;
 }
 
 int evaluate(char* opcode, char* line)
 {
-	char* data = malloc(2);
 	int res;
 	if(strcmp(opcode, "ADD") == 0)
 		res = ADD(line);
@@ -622,6 +624,7 @@ void decode(unsigned int hexa)
     char type;
     char op = 0, rs = 0, rt = 0, rd = 0, sa = 0;
     short imm = 0;
+    int index;
     if( (hexa & 0xfc000000) == 0 ) //On distingue le type R des deux autres types.
     {
         type = 'R';
@@ -694,7 +697,7 @@ void decode(unsigned int hexa)
                 break;
         }
     }
-    //Réaliser un masque pour chaque fonction pour les types I et J
+    //Réalisation un masque pour chaque fonction pour les types I et J
     else
     {
         //Traiter Jump et Jump and link a part
@@ -702,9 +705,17 @@ void decode(unsigned int hexa)
         rs = (hexa >> 21) & 0x1f;
         rt = (hexa >> 16) & 0x1f;
         imm = hexa & 0xffff;
+        index = hexa & 0x03ffffff;
 
         switch(op)
         {
+            case 2:
+                printf("{J %d}\n", index);
+                reg_Jump("J", index);
+                break;
+            case 3:
+                printf("{JAL %d}\n", index);
+                reg_Jump("JAL", index);
             case 8:
                 printf("{ADDI $%d, $%d, %d}\n", rt, rs, imm);
                 set_reg("ADDI", rt, rs, 0, imm);

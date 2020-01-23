@@ -31,7 +31,7 @@ void non_interactif_mode(char* input_file, char* output_file, int pas)
 		exit(EXIT_FAILURE);
 	}
 
-	FILE *output = fopen(output_file, "r+");
+	FILE *output = fopen(output_file, "w");
 	if( output == NULL )
 	{
 		printf("Erreur lors de l'ouverture du fichier écriture\n");
@@ -50,7 +50,7 @@ void non_interactif_mode(char* input_file, char* output_file, int pas)
 	char letter[2];
 	while( (hex = readMemory(DATA_MEM+get_pc())) != 0xffffffff ) //On traite chaque instruction en mémoire jusqu"à l'instruction EXIT
 	{
-		printf("\n PC = %d \n", get_pc());
+		printf("\nPC = %d \n", get_pc());
 		printf("Processing instruction:\n%08x	", hex);
 		set_pc();  //On incrémente le PC
 		decode(hex);
@@ -64,7 +64,7 @@ void non_interactif_mode(char* input_file, char* output_file, int pas)
 				else if( letter[0] == 'm' )
 					printMemory();
 				else if ( letter[0] == 'c' )
-					printf("Next instruction : \n");
+					printf("\nNext instruction : \n");
 				else
 					printf("Wrong command\n");
 			}while( letter[0] != 'c' );
@@ -72,6 +72,8 @@ void non_interactif_mode(char* input_file, char* output_file, int pas)
 	}
 	print_reg();
 	printMemory();	
+	fclose(input);
+	fclose(output);
 }
 
 
@@ -88,12 +90,21 @@ int main(int argc, char** argv)
 
 	if ( argc == 1 )
 		interactif_mode(0);
+
 	else if ( argc == 3 )
 		non_interactif_mode(argv[1], argv[2], 0);
 	else if ( argc == 4 )
-		non_interactif_mode(argv[1], argv[2], 1);
+	{
+		if( !strcmp( argv[3], "-pas") )
+			non_interactif_mode(argv[1], argv[2], 1);
+		else
+		{
+			printf("Erreur lors de l'exécution: format : ./emul-mips ['input file' 'output file' [-pas] ]\n");
+			return -1;
+		}
+	}
 
 	
-
+	free(mem);
 	return 0; 
 }
