@@ -15,7 +15,6 @@ void initRegisters()
 
 int alias_to_nbr(char* reg_name)  //Fonction permettant de passer du nom du registre à son numéro
 {
-	printf("alias : %s\n", reg_name);
 	int nbr;
 	if (!strcmp(reg_name, "zero"))
 		nbr = 0;
@@ -67,6 +66,8 @@ void set_reg(char* instruction, char r1, char r2, char r3, short imm)
 		regs.pc = (regs.general[r1] <= 0 ? (regs.pc+(imm << 2)) : regs.pc);
 	else if ( !strcmp(instruction, "DIV") )
 	{
+		if(regs.general[r2] == 0)  //Cas de la division par 0
+			return;
 		regs.lo = regs.general[r1] / regs.general[r2];
 		regs.hi = regs.general[r1] % regs.general[r2];
 	}

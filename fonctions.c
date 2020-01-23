@@ -80,9 +80,9 @@ int ADD(char* line)
 		data[i++] = token;
 	res = 32;
 	res += 0 << 6;
-	res += atoi(data[0]+1)<<11;
-	res += atoi(data[2]+1)<<16;
-	res += atoi(data[1]+1)<<21;
+	res += alias_to_nbr(data[0]+1)<<11;
+	res += alias_to_nbr(data[2]+1)<<16;
+	res += alias_to_nbr(data[1]+1)<<21;
     free(tofree);
 	return res;
 }
@@ -120,9 +120,9 @@ int AND(char* line)
 		data[i++] = token;
 	res = 36;
 	res += 0<<6;
-	res += atoi(data[0]+1)<<11;
-	res += atoi(data[2]+1)<<16;
-	res += atoi(data[1]+1)<<21;
+	res += alias_to_nbr(data[0]+1)<<11;
+	res += alias_to_nbr(data[2]+1)<<16;
+	res += alias_to_nbr(data[1]+1)<<21;
     free(tofree);
 	return res;
 }
@@ -137,10 +137,10 @@ int BEQ(char* line)
 	char* tofree = tmp = strdup(line);
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
-	res = atoi(data[2]);
+	res = alias_to_nbr(data[2]);
     res = res & 0x0000ffff;
-	res += atoi(data[1]+1)<<16;
-	res += atoi(data[0]+1)<<21;
+	res += alias_to_nbr(data[1]+1)<<16;
+	res += alias_to_nbr(data[0]+1)<<21;
 	res += 4<<26;
     free(tofree);
 	return res;
@@ -156,9 +156,9 @@ int BGTZ(char* line)
 	char* tofree = tmp = strdup(line);
 	while( token = strsep(&tmp, ",") )
 		data[i++] = token;
-	res = atoi(data[1]);
+	res = alias_to_nbr(data[1]);
     res = res & 0x0000ffff;
-	res += atoi(data[0]+1)<<21;
+	res += alias_to_nbr(data[0]+1)<<21;
 	res += 7<<26;
     free(tofree);
 	return res;
@@ -174,9 +174,9 @@ int BLEZ(char* line)
     char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
-    res = atoi(data[1]);
+    res = alias_to_nbr(data[1]);
     res = res & 0x0000ffff;
-    res += atoi(data[0]+1)<<21;
+    res += alias_to_nbr(data[0]+1)<<21;
     res += 6<<26;
     free(tofree);
     return res;
@@ -192,10 +192,10 @@ int BNE(char* line)
     char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
-    res = atoi(data[2]);
+    res = alias_to_nbr(data[2]);
     res = res & 0x0000ffff;
-    res += atoi(data[1]+1)<<16;
-    res += atoi(data[0]+1)<<21;
+    res += alias_to_nbr(data[1]+1)<<16;
+    res += alias_to_nbr(data[0]+1)<<21;
     res += 5<<26;
     free(tofree);
     return res;
@@ -212,8 +212,8 @@ int DIV(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 26;
-    res += atoi(data[1]+1)<<16;
-    res += atoi(data[0]+1)<<21;
+    res += alias_to_nbr(data[1]+1)<<16;
+    res += alias_to_nbr(data[0]+1)<<21;
     free(tofree);
     return res;
 }
@@ -228,7 +228,7 @@ int J(char* line)
     char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
-    res = atoi(data[0]);
+    res = alias_to_nbr(data[0]);
     res += 2<<26;
     free(tofree);
     return res;
@@ -244,7 +244,7 @@ int JAL(char* line)
     char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
-    res = atoi(data[0]);
+    res = alias_to_nbr(data[0]);
     res += 3<<26;
     free(tofree);
     return res;
@@ -261,7 +261,7 @@ int JR(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 8;
-    res += atoi(data[0]+1)<<21;
+    res += alias_to_nbr(data[0]+1)<<21;
     free(tofree);
     return res;
 }
@@ -276,9 +276,9 @@ int LUI(char* line)
     char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
-    res = atoi(data[1]);
+    res = alias_to_nbr(data[1]);
     res = res & 0x0000ffff;
-    res += atoi(data[0]+1)<<16;
+    res += alias_to_nbr(data[0]+1)<<16;
     res += 15<<26;
     free(tofree);
     return res;
@@ -294,9 +294,9 @@ int LW(char* line)
     char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
-    res = atoi(data[1]);
+    res = alias_to_nbr(data[1]);
     res = res & 0x0000ffff;
-    res += atoi(data[0]+1)<<16;
+    res += alias_to_nbr(data[0]+1)<<16;
     res += 35<<26;
     free(tofree);
     return res;
@@ -313,7 +313,7 @@ int MFHI(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 16;
-    res += atoi(data[0]+1)<<11;
+    res += alias_to_nbr(data[0]+1)<<11;
     free(tofree);
     return res;
 }
@@ -329,7 +329,7 @@ int MFLO(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 18;
-    res += atoi(data[0]+1)<<11;
+    res += alias_to_nbr(data[0]+1)<<11;
     free(tofree);
     return res;
 }
@@ -345,8 +345,8 @@ int MULT(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 24;
-    res += atoi(data[1]+1)<<16;
-    res += atoi(data[0]+1)<<21;
+    res += alias_to_nbr(data[1]+1)<<16;
+    res += alias_to_nbr(data[0]+1)<<21;
     free(tofree);
     return res;
 }
@@ -377,9 +377,9 @@ int OR(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 37;
-    res += atoi(data[0]+1)<<11;
-    res += atoi(data[2]+1)<<16;
-    res += atoi(data[1]+1)<<21;
+    res += alias_to_nbr(data[0]+1)<<11;
+    res += alias_to_nbr(data[2]+1)<<16;
+    res += alias_to_nbr(data[1]+1)<<21;
     free(tofree);
     return res;
 }
@@ -414,9 +414,9 @@ int SLL(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 0;
-    res += atoi(data[2])<<6;
-    res += atoi(data[0]+1)<<11;
-    res += atoi(data[1]+1)<<16;
+    res += alias_to_nbr(data[2])<<6;
+    res += alias_to_nbr(data[0]+1)<<11;
+    res += alias_to_nbr(data[1]+1)<<16;
     free(tofree);
     return res;
 }
@@ -432,9 +432,9 @@ int SLT(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 42;
-    res += atoi(data[0]+1)<<11;
-    res += atoi(data[2]+1)<<16;
-    res += atoi(data[1]+1)<<21;
+    res += alias_to_nbr(data[0]+1)<<11;
+    res += alias_to_nbr(data[2]+1)<<16;
+    res += alias_to_nbr(data[1]+1)<<21;
     free(tofree);
     return res;
 }
@@ -450,9 +450,9 @@ int SRL(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 2;
-    res += atoi(data[2])<<6;
-    res += atoi(data[0]+1)<<11;
-    res += atoi(data[1]+1)<<16;
+    res += alias_to_nbr(data[2])<<6;
+    res += alias_to_nbr(data[0]+1)<<11;
+    res += alias_to_nbr(data[1]+1)<<16;
     free(tofree);
     return res;
 }
@@ -468,9 +468,9 @@ int SUB(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 34;
-    res += atoi(data[0]+1)<<11;
-    res += atoi(data[2]+1)<<16;
-    res += atoi(data[1]+1)<<21;
+    res += alias_to_nbr(data[0]+1)<<11;
+    res += alias_to_nbr(data[2]+1)<<16;
+    res += alias_to_nbr(data[1]+1)<<21;
     free(tofree);
     return res;
 }
@@ -485,9 +485,9 @@ int SW(char* line)
     char* tofree = tmp = strdup(line);
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
-    res = atoi(data[1]);
+    res = alias_to_nbr(data[1]);
     res = res & 0x0000ffff;
-    res += atoi(data[0]+1)<<16;
+    res += alias_to_nbr(data[0]+1)<<16;
     res += 43<<26;
     free(tofree);
     return res;
@@ -519,9 +519,9 @@ int XOR(char* line)
     while( token = strsep(&tmp, ",") )
         data[i++] = token;
     res = 38;
-    res += atoi(data[0]+1)<<11;
-    res += atoi(data[2]+1)<<16;
-    res += atoi(data[1]+1)<<21;
+    res += alias_to_nbr(data[0]+1)<<11;
+    res += alias_to_nbr(data[2]+1)<<16;
+    res += alias_to_nbr(data[1]+1)<<21;
     free(tofree);
     return res;
 }
